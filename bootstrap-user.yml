@@ -1,0 +1,126 @@
+---
+
+- name: Bootstrap workstation
+  gather_facts: true
+  hosts: localhost
+  become: no
+  tasks:
+
+    - name: Install pip packages
+      pip:
+        name:
+          - ansible-lint
+          - yamllint
+
+    - name: Ensure ssh is correctly configured for {{ ansible_user_id }}
+      block:
+
+      - name: Ensure ~/.ssh/ exists with proper permissions
+        file:
+          path: ~/.ssh
+          state: directory
+          owner: "{{ ansible_user_id }}"
+          group: "{{ ansible_user_id }}"
+          mode: '0700'
+
+      - name: Ensure ~/.ssh/sessions exists with proper permissions
+        file:
+          path: ~/.ssh/sessions
+          state: directory
+          owner: "{{ ansible_user_id }}"
+          group: "{{ ansible_user_id }}"
+          mode: '0700'
+
+      - name: Add ~/.ssh/config-crypto to enforce safe defaults
+        copy:
+          src: ssh/config-crypto
+          dest: ~/.ssh/
+          owner: "{{ ansible_user_id }}"
+          group: "{{ ansible_user_id }}"
+          mode: '0600'
+
+      - name: Add ~/.ssh/config-defaults to enforce safe defaults
+        copy:
+          src: ssh/config-defaults
+          dest: ~/.ssh/
+          owner: "{{ ansible_user_id }}"
+          group: "{{ ansible_user_id }}"
+          mode: '0600'
+
+      - name: Ensure ~/.ssh/config file exists
+        file:
+          path: ~/.ssh/config
+          state: file
+          owner: "{{ ansible_user_id }}"
+          group: "{{ ansible_user_id }}"
+          mode: '0600'
+
+      - name: Ensure config-crypto include
+        lineinfile:
+          state: present
+          insertbefore: BOF
+          regexp: ^Include ~\/\.ssh\/config-crypto
+          path: ~/.ssh/config
+          line: Include ~/.ssh/config-crypto
+
+      - name: Ensure config-defaults include
+        lineinfile:
+          state: present
+          insertbefore: BOF
+          regexp: ^Include ~\/\.ssh\/config-defaults
+          path: ~/.ssh/config
+          line: Include ~/.ssh/config-defaults
+
+    - name: Ensure ~/.fonts exists
+      file:
+        path: ~/.fonts
+        state: directory
+        owner: "{{ ansible_user_id }}"
+        group: "{{ ansible_user_id }}"
+        mode: '0700'
+
+    - name: Ensure ~/.fonts/hack exists
+      file:
+        path: ~/.fonts/hack
+        state: directory
+        owner: "{{ ansible_user_id }}"
+        group: "{{ ansible_user_id }}"
+        mode: '0700'
+
+    - name: Install nerdfonts
+      unarchive:
+        src: fonts/Hack.zip
+        dest: ~/.fonts/hack
+      notify:
+        - fc-cache force-build
+
+    - name: Check if input font is installed
+      stat:
+        path: ~/.fonts/Input_Fonts
+      register: input_font
+
+    - name: Install input font
+      block:
+        - name: Install imput font
+          unarchive:
+            src: "https://input.fontbureau.com/build/?fontSelection=whole&a=0&g=0&i=0&l=0&zero=0&asterisk=0&braces=0&preset=default&line-height=1.2&accept=I+do&email="
+            dest: ~/.fonts/
+            remote_src: yes
+          notify:
+            - fc-cache force-build
+
+        - name: Clean up ~/.fonts after install
+          file:
+            path: "{{ item }}"
+            state: absent
+          with_items:
+            - ChangeLog.txtd
+            - INSTALL.txt
+            - LICENSE.txt
+            - README.txt
+            - Scripts
+      when: not input_font.stat.exists
+
+  handlers:
+    - name: fc-cache force-build
+      shell: fc-cache -f

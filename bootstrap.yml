@@ -1,0 +1,171 @@
+---
+
+- name: Bootstrap workstation
+  gather_facts: false
+  hosts: localhost
+  become: yes
+  tasks:
+
+    - name: get the rpm package facts
+      package_facts:
+        manager: "auto"
+
+    - name: Add visual studio code repo
+      yum_repository:
+        name: vscode
+        description: Visual Studio Code
+        baseurl: https://packages.microsoft.com/yumrepos/vscode
+        gpgcheck: yes
+        gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+
+    - name: Add tjuberg copr i3-desktop repo
+      yum_repository:
+        name: tjuberg-i3-desktop-fedora
+        description: Copr repo for i3-desktop owned by tjuberg
+        baseurl: https://download.copr.fedorainfracloud.org/results/tjuberg/i3-desktop/fedora-$releasever-$basearch/
+        skip_if_unavailable: yes
+        gpgcheck: yes
+        gpgkey: https://download.copr.fedorainfracloud.org/results/tjuberg/i3-desktop/pubkey.gpg
+
+    - name: Add vivaldi repo
+      yum_repository:
+        name: vivaldi
+        description: vivaldi
+        baseurl: https://repo.vivaldi.com/archive/rpm/$basearch
+        gpgcheck: yes
+        gpgkey: https://repo.vivaldi.com/archive/linux_signing_key.pub
+
+    - name: Add microsoft repo
+      yum_repository:
+        name: packages-microsoft-com-prod
+        description: packages-microsoft-com-prod
+        baseurl: https://packages.microsoft.com/rhel/7/prod/
+        gpgcheck: yes
+        gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+
+    - name: Add microsoft teams repo
+      yum_repository:
+        name: teams
+        description: teams
+        baseurl: https://packages.microsoft.com/yumrepos/ms-teams
+        gpgcheck: yes
+        gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+
+    - name: Add slack repo
+      yum_repository:
+        name: slack
+        description: slack
+        baseurl: https://packagecloud.io/slacktechnologies/slack/fedora/21/x86_64
+        gpgcheck: no
+        gpgkey: https://packagecloud.io/gpg.key
+        sslverify: yes
+        sslcacert: /etc/pki/tls/certs/ca-bundle.crt
+
+    - name: Install refind
+      dnf:
+        name: https://downloads.sourceforge.net/project/refind/0.12.0/refind-0.12.0-1.x86_64.rpm
+        state: present
+        disable_gpg_check: yes
+      when: "'refind' not in ansible_facts.packages"
+
+    - name: Check if refind theme is installed
+      stat:
+        path: /boot/efi/EFI/refind/refind-theme-regular
+      register: refind_theme
+
+    - name: Install and configure refind-theme-regular dark
+      block:
+
+        - name: Unarchive refind-theme-regular.zip
+          unarchive:
+            src: refind-theme-regular/refind-theme-regular.zip
+            dest: /boot/efi/EFI/refind/
+
+        - name: Rename folder theme folder
+          command: mv /boot/efi/EFI/refind/refind-theme-regular-master /boot/efi/EFI/refind/refind-theme-regular
+
+        - name: Add refind-theme-regular config
+          copy:
+            src: refind-theme-regular/theme.conf
+            dest: /boot/efi/EFI/refind/refind-theme-regular/
+
+        - name: Enable refind-theme-regular
+          lineinfile:
+            state: present
+            insertafter: EOF
+            regexp: ^include refind-theme-regular\/theme\.conf
+            path: /boot/efi/EFI/refind/refind.conf
+            line: include refind-theme-regular/theme.conf
+
+      when: not refind_theme.stat.exists
+
+    - name: Set up plasma-i3
+      block:
+
+        - name: plasma-i3.desktop
+          copy:
+            src: plasma-i3/plasma-i3.desktop
+            dest: /usr/share/xsessions/
+            owner: root
+            group: root
+            mode: '0755'
+
+        - name: plasma-i3.sh
+          copy:
+            src: plasma-i3/plasma-i3.sh
+            dest: /usr/local/bin/
+            owner: root
+            group: root
+            mode: '0755'
+
+
+    - name: Install packages
+      dnf:
+        name:
+          - zsh
+          - neovim
+          - python3-neovim
+          - code
+          - i3-gaps
+          - rofi
+          - polybar
+          - vivaldi-stable
+          - firefox
+          - htop
+          - kvantum
+          - snapd
+          - rsync
+          - powershell
+          - slack
+          - teams
+          - stow
+          - task
+          - picom
+          - nitrogen
+          - remmina
+          - nextcloud-client
+          - nextcloud-client-dolphin
+          - keepassxc
+          # - alacritty
+        state: present
+
+    - name: Install Authy snap
+      community.general.snap:
+        name: authy
+        channel: latest/beta
+
+    - name: Install Beekeeper studio snap
+      community.general.snap:
+        name: beekeeper-studio
+        channel: latest/stable
+
+    - name: Install general snaps
+      community.general.snap:
+        name:
+          - signal-desktop
+
+    - name: Enable sshd
+      service:
+        name: sshd.service
+        state: started
+        enabled: yes

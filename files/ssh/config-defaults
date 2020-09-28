@@ -1,0 +1,8 @@
+identityfile ~/.ssh/id_ed25519
+identitiesonly yes
+serveraliveinterval 60
+ControlMaster auto
+ControlPath ~/.ssh/sessions/%C
+ControlPersist 1h
+HashKnownHosts yes
+GSSAPIAuthentication no
