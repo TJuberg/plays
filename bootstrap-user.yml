@@ -9,8 +9,10 @@
     - name: Install pip packages
       pip:
         name:
+          - wheel
           - ansible-lint
           - yamllint
+          - ipconflict
 
     - name: Ensure ssh is correctly configured for {{ ansible_user_id }}
       block:
