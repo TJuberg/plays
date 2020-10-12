@@ -150,6 +150,8 @@
           - jq
           - python3-devel
           - arandr
+          - pavucontrol
+          - openssl
         state: present
 
     - name: Install Authy snap
@@ -166,6 +168,7 @@
       community.general.snap:
         name:
           - signal-desktop
+          - spt
 
     - name: "WIP: install vmware horizon view"
       block:
