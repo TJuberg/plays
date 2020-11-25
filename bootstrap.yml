@@ -152,6 +152,11 @@
           - arandr
           - pavucontrol
           - openssl
+          - kaccounts-providers
+          - kio-gdrive
+          - kio-fuse
+          - ncdu
+          - ccze
         state: present
 
     - name: Install Authy snap

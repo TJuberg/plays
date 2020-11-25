@@ -17,6 +17,11 @@
           - pyyaml
           - netaddr
           - diagrams
+          - dnsrecon
+          - lxml
+          - flake8
+          - dnspython
+          - hashid
 
     - name: Ensure ssh is correctly configured for {{ ansible_user_id }}
       block:
