@@ -152,6 +152,7 @@
           - arandr
           - pavucontrol
           - openssl
+          - dnf-utils
         state: present
 
     - name: Install Authy snap
