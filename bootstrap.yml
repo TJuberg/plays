@@ -153,6 +153,11 @@
           - pavucontrol
           - openssl
           - dnf-utils
+          - kaccounts-providers
+          - kio-gdrive
+          - kio-fuse
+          - ncdu
+          - ccze
         state: present
 
     - name: Install Authy snap
