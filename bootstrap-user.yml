@@ -22,6 +22,7 @@
           - flake8
           - dnspython
           - hashid
+          - pre-commit
 
     - name: Ensure ssh is correctly configured for {{ ansible_user_id }}
       block:

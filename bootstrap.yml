@@ -158,6 +158,8 @@
           - kio-fuse
           - ncdu
           - ccze
+          - inkscape
+          - inkscape-view
         state: present
 
     - name: Install Authy snap
