@@ -61,43 +61,43 @@
         sslverify: yes
         sslcacert: /etc/pki/tls/certs/ca-bundle.crt
 
-    - name: Install refind
-      dnf:
-        name: https://downloads.sourceforge.net/project/refind/0.12.0/refind-0.12.0-1.x86_64.rpm
-        state: present
-        disable_gpg_check: yes
-      when: "'refind' not in ansible_facts.packages"
-
-    - name: Check if refind theme is installed
-      stat:
-        path: /boot/efi/EFI/refind/refind-theme-regular
-      register: refind_theme
-
-    - name: Install and configure refind-theme-regular dark
-      block:
-
-        - name: Unarchive refind-theme-regular.zip
-          unarchive:
-            src: refind-theme-regular/refind-theme-regular.zip
-            dest: /boot/efi/EFI/refind/
-
-        - name: Rename folder theme folder
-          command: mv /boot/efi/EFI/refind/refind-theme-regular-master /boot/efi/EFI/refind/refind-theme-regular
-
-        - name: Add refind-theme-regular config
-          copy:
-            src: refind-theme-regular/theme.conf
-            dest: /boot/efi/EFI/refind/refind-theme-regular/
-
-        - name: Enable refind-theme-regular
-          lineinfile:
-            state: present
-            insertafter: EOF
-            regexp: ^include refind-theme-regular\/theme\.conf
-            path: /boot/efi/EFI/refind/refind.conf
-            line: include refind-theme-regular/theme.conf
-
-      when: not refind_theme.stat.exists
+ #   - name: Install refind
+ #     dnf:
+ #       name: https://downloads.sourceforge.net/project/refind/0.12.0/refind-0.12.0-1.x86_64.rpm
+ #       state: present
+ #       disable_gpg_check: yes
+ #     when: "'refind' not in ansible_facts.packages"
+#
+#    - name: Check if refind theme is installed
+#      stat:
+#        path: /boot/efi/EFI/refind/refind-theme-regular
+#      register: refind_theme
+#
+#    - name: Install and configure refind-theme-regular dark
+#      block:
+#
+#        - name: Unarchive refind-theme-regular.zip
+#          unarchive:
+#            src: refind-theme-regular/refind-theme-regular.zip
+#            dest: /boot/efi/EFI/refind/
+#
+#        - name: Rename folder theme folder
+#          command: mv /boot/efi/EFI/refind/refind-theme-regular-master /boot/efi/EFI/refind/refind-theme-regular
+#
+#        - name: Add refind-theme-regular config
+#          copy:
+#            src: refind-theme-regular/theme.conf
+#            dest: /boot/efi/EFI/refind/refind-theme-regular/
+#
+#        - name: Enable refind-theme-regular
+#          lineinfile:
+#            state: present
+#            insertafter: EOF
+#            regexp: ^include refind-theme-regular\/theme\.conf
+#            path: /boot/efi/EFI/refind/refind.conf
+#            line: include refind-theme-regular/theme.conf
+#
+#      when: not refind_theme.stat.exists
 
     - name: Set up plasma-i3
       block:
@@ -209,3 +209,10 @@
         name: sshd.service
         state: started
         enabled: yes
+
+    - name: Allow synergy server trough firewall
+      firewalld:
+        port: 24800/tcp
+        permanent: yes
+        immediate: yes
+        state: enabled
