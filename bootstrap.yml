@@ -160,6 +160,8 @@
           - ccze
           - inkscape
           - inkscape-view
+          - redshift
+          - plasma-applet-redshift-control
         state: present
 
     - name: Install Authy snap
