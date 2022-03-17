@@ -6,12 +6,16 @@
   become: no
   tasks:
 
-    - name: Install pip packages
+    - name: Install pip wheel package
       pip:
         name:
           - wheel
-          - ansible-lint
-          - yamllint
+
+    - name: Install pip packages
+      pip:
+        name:
+          #- ansible-lint
+          #- yamllint
           - ipconflict
           - pydotplus
           - pyyaml
@@ -23,65 +27,95 @@
           - dnspython
           - hashid
           - pre-commit
+          - yamllint
+
+    - name: Enable i3 for plasma
+      block:
+
+        - name: "Ensure /home/{{ ansible_user_id }}/.config/systemd/user/ exists"
+          file:
+            path: "/home/{{ ansible_user_id }}/.config/systemd/user/"
+            state: directory
+            mode: '0755'
+
+        - name: plasma-i3.desktop
+          copy:
+            src: plasma-i3/i3.service
+            dest: "/home/{{ ansible_user_id }}/.config/systemd/user/i3.service"
+            owner: "{{ ansible_user_id }}"
+            group: "{{ ansible_user_id }}"
+            mode: '0744'
+
+        - name: Mask plasma-kwin_x11.service
+          systemd:
+            name: plasma-kwin_x11.service
+            scope: user
+            masked: yes
+            daemon_reload: yes
+
+        - name: Add i3.service wants
+          command:
+            cmd: systemctl --user add-wants plasma-workspace-x11.target i3.service
+
 
     - name: Ensure ssh is correctly configured for {{ ansible_user_id }}
       block:
 
-      - name: Ensure ~/.ssh/ exists with proper permissions
-        file:
-          path: ~/.ssh
-          state: directory
-          owner: "{{ ansible_user_id }}"
-          group: "{{ ansible_user_id }}"
-          mode: '0700'
+        - name: Ensure ~/.ssh/ exists with proper permissions
+          file:
+            path: ~/.ssh
+            state: directory
+            owner: "{{ ansible_user_id }}"
+            group: "{{ ansible_user_id }}"
+            mode: '0700'
 
-      - name: Ensure ~/.ssh/sessions exists with proper permissions
-        file:
-          path: ~/.ssh/sessions
-          state: directory
-          owner: "{{ ansible_user_id }}"
-          group: "{{ ansible_user_id }}"
-          mode: '0700'
+        - name: Ensure ~/.ssh/sessions exists with proper permissions
+          file:
+            path: ~/.ssh/sessions
+            state: directory
+            owner: "{{ ansible_user_id }}"
+            group: "{{ ansible_user_id }}"
+            mode: '0700'
 
-      - name: Add ~/.ssh/config-crypto to enforce safe defaults
-        copy:
-          src: ssh/config-crypto
-          dest: ~/.ssh/
-          owner: "{{ ansible_user_id }}"
-          group: "{{ ansible_user_id }}"
-          mode: '0600'
+        - name: Add ~/.ssh/config-crypto to enforce safe defaults
+          copy:
+            src: ssh/config-crypto
+            dest: ~/.ssh/
+            owner: "{{ ansible_user_id }}"
+            group: "{{ ansible_user_id }}"
+            mode: '0600'
 
-      - name: Add ~/.ssh/config-defaults to enforce safe defaults
-        copy:
-          src: ssh/config-defaults
-          dest: ~/.ssh/
-          owner: "{{ ansible_user_id }}"
-          group: "{{ ansible_user_id }}"
-          mode: '0600'
+        - name: Add ~/.ssh/config-defaults to enforce safe defaults
+          copy:
+            src: ssh/config-defaults
+            dest: ~/.ssh/
+            owner: "{{ ansible_user_id }}"
+            group: "{{ ansible_user_id }}"
+            mode: '0600'
 
-      - name: Ensure ~/.ssh/config file exists
-        file:
-          path: ~/.ssh/config
-          state: file
-          owner: "{{ ansible_user_id }}"
-          group: "{{ ansible_user_id }}"
-          mode: '0600'
+        - name: Ensure ~/.ssh/config file exists
+          file:
+            path: ~/.ssh/config
+            state: file
+            owner: "{{ ansible_user_id }}"
+            group: "{{ ansible_user_id }}"
+            mode: '0600'
 
-      - name: Ensure config-crypto include
-        lineinfile:
-          state: present
-          insertbefore: BOF
-          regexp: ^Include ~\/\.ssh\/config-crypto
-          path: ~/.ssh/config
-          line: Include ~/.ssh/config-crypto
+        - name: Ensure config-crypto include
+          lineinfile:
+            state: present
+            insertbefore: BOF
+            regexp: ^Include ~\/\.ssh\/config-crypto
+            path: ~/.ssh/config
+            line: Include ~/.ssh/config-crypto
 
-      - name: Ensure config-defaults include
-        lineinfile:
-          state: present
-          insertbefore: BOF
-          regexp: ^Include ~\/\.ssh\/config-defaults
-          path: ~/.ssh/config
-          line: Include ~/.ssh/config-defaults
+        - name: Ensure config-defaults include
+          lineinfile:
+            state: present
+            insertbefore: BOF
+            regexp: ^Include ~\/\.ssh\/config-defaults
+            path: ~/.ssh/config
+            line: Include ~/.ssh/config-defaults
 
     - name: Ensure ~/.fonts exists
       file:
@@ -115,7 +149,7 @@
       block:
         - name: Install imput font
           unarchive:
-            src: "https://input.fontbureau.com/build/?fontSelection=whole&a=0&g=0&i=0&l=0&zero=0&asterisk=0&braces=0&preset=default&line-height=1.2&accept=I+do&email="
+            src: "https://input.djr.com/build/?fontSelection=whole&a=0&g=0&i=0&l=0&zero=0&asterisk=0&braces=0&preset=default&line-height=1.2&accept=I+do&email="
             dest: ~/.fonts/
             remote_src: yes
           notify:

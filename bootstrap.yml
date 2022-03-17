@@ -98,26 +98,19 @@
 #            line: include refind-theme-regular/theme.conf
 #
 #      when: not refind_theme.stat.exists
-
-    - name: Set up plasma-i3
+#
+    - name: Clean up old plasma-i3 files
       block:
 
         - name: plasma-i3.desktop
-          copy:
-            src: plasma-i3/plasma-i3.desktop
-            dest: /usr/share/xsessions/
-            owner: root
-            group: root
-            mode: '0755'
+          file:
+            path: /usr/share/xsessions/plasma-i3/plasma-i3.desktop
+            state: absent
 
         - name: plasma-i3.sh
-          copy:
-            src: plasma-i3/plasma-i3.sh
-            dest: /usr/local/bin/
-            owner: root
-            group: root
-            mode: '0755'
-
+          file:
+            path: /usr/local/bin/plasma-i3/plasma-i3.sh
+            state: absent
 
     - name: Install packages
       dnf:
@@ -150,7 +143,6 @@
           - jq
           - python3-devel
           - arandr
-          - pavucontrol
           - openssl
           - dnf-utils
           - kaccounts-providers
@@ -162,6 +154,8 @@
           - inkscape-view
           - redshift
           - plasma-applet-redshift-control
+          - python3-ansible-lint
+          - fedora-flathub-remote
         state: present
 
     - name: Install Authy snap
@@ -169,16 +163,16 @@
         name: authy
         channel: latest/beta
 
-    - name: Install Beekeeper studio snap
-      community.general.snap:
-        name: beekeeper-studio
-        channel: latest/stable
+#    - name: Install Beekeeper studio snap
+#      community.general.snap:
+#        name: beekeeper-studio
+#        channel: latest/stable
 
-    - name: Install general snaps
-      community.general.snap:
-        name:
-          - signal-desktop
-          - spt
+#    - name: Install general snaps
+#      community.general.snap:
+#        name:
+#          - signal-desktop
+#          - spt
 
     - name: "WIP: install vmware horizon view"
       block:
