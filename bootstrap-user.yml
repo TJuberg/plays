@@ -27,7 +27,6 @@
           - dnspython
           - hashid
           - pre-commit
-          - yamllint
 
     - name: Enable i3 for plasma
       block:
