@@ -10,13 +10,13 @@
       package_facts:
         manager: "auto"
 
-    - name: Add visual studio code repo
+    - name: Add vscodium repo
       yum_repository:
-        name: vscode
-        description: Visual Studio Code
-        baseurl: https://packages.microsoft.com/yumrepos/vscode
+        name: vscodium
+        description: vscodium
+        baseurl: https://download.vscodium.com/rpms/
         gpgcheck: yes
-        gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+        gpgkey: https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg
 
     - name: Add tjuberg copr i3-desktop repo
       yum_repository:
@@ -118,7 +118,7 @@
           - zsh
           - neovim
           - python3-neovim
-          - code
+          - codium
           - i3-gaps
           - rofi
           - polybar
