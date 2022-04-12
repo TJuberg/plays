@@ -156,6 +156,8 @@
           - plasma-applet-redshift-control
           - python3-ansible-lint
           - fedora-flathub-remote
+          - rpmdevtools
+          - fedpkg
         state: present
 
     - name: Install Authy snap
