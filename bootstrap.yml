@@ -160,6 +160,7 @@
           - fedpkg
           - dunst
           - ripgrep
+          - podman-tui
         state: present
 
     - name: Install Authy snap
