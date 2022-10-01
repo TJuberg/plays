@@ -95,7 +95,7 @@
         - name: Ensure ~/.ssh/config file exists
           file:
             path: ~/.ssh/config
-            state: file
+            state: touch
             owner: "{{ ansible_user_id }}"
             group: "{{ ansible_user_id }}"
             mode: '0600'

@@ -120,6 +120,7 @@
           - python3-neovim
           - codium
           - i3-gaps
+          - i3lock
           - rofi
           - polybar
           - vivaldi-stable
@@ -153,11 +154,12 @@
           - inkscape
           - inkscape-view
           - redshift
-          - plasma-applet-redshift-control
           - python3-ansible-lint
           - fedora-flathub-remote
           - rpmdevtools
           - fedpkg
+          - dunst
+          - ripgrep
         state: present
 
     - name: Install Authy snap
